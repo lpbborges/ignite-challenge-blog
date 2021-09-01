@@ -7,6 +7,7 @@ import ptBR from 'date-fns/locale/pt-BR';
 
 import { useEffect } from 'react';
 import { useState } from 'react';
+import { useMemo } from 'react';
 import { getPrismicClient } from '../services/prismic';
 
 import commonStyles from '../styles/common.module.scss';
@@ -49,12 +50,28 @@ export default function Home({ postsPagination }: HomeProps): JSX.Element {
     setPosts(state => [...state, ...data.results]);
   };
 
+  const postsFormatted = useMemo(() => {
+    if (posts.length <= 0) return posts;
+    return posts.map(post => {
+      return {
+        ...post,
+        first_publication_date: format(
+          new Date(post.first_publication_date),
+          'dd MMM yyyy',
+          {
+            locale: ptBR,
+          }
+        ),
+      };
+    });
+  }, [posts]);
+
   return (
     <>
       <Header />
       <main className={commonStyles.wrapper}>
         <div className={styles.posts}>
-          {posts.map(post => (
+          {postsFormatted.map(post => (
             <Link key={post.uid} href={`/post/${post.uid}`}>
               <a className={styles.post}>
                 <h2>{post.data.title}</h2>
@@ -98,27 +115,9 @@ export const getStaticProps: GetStaticProps = async () => {
     }
   );
 
-  const posts = postResponse.results.map(post => {
-    return {
-      uid: post.uid,
-      first_publication_date: format(
-        new Date(post.last_publication_date),
-        'dd MMM yyyy',
-        {
-          locale: ptBR,
-        }
-      ),
-      data: {
-        title: post.data.title as string,
-        subtitle: post.data.subtitle as string,
-        author: post.data.author as string,
-      },
-    };
-  });
-
   const postsPagination = {
     next_page: postResponse.next_page,
-    results: posts,
+    results: postResponse.results,
   };
 
   return {

@@ -1,7 +1,13 @@
 import { GetStaticPaths, GetStaticProps } from 'next';
 import Image from 'next/image';
 import { FiCalendar, FiClock, FiUser } from 'react-icons/fi';
+import Prismic from '@prismicio/client';
+import { format } from 'date-fns';
+import ptBR from 'date-fns/locale/pt-BR';
+import { RichText } from 'prismic-dom';
+import { useMemo } from 'react';
 
+import { useRouter } from 'next/router';
 import Header from '../../components/Header';
 
 import { getPrismicClient } from '../../services/prismic';
@@ -29,73 +35,120 @@ interface PostProps {
   post: Post;
 }
 
-export default function Post(): JSX.Element {
+export default function Post({ post }: PostProps): JSX.Element {
+  const router = useRouter();
+
+  const postFormatted = useMemo(() => {
+    const content = post.data.content.map(postContent => {
+      return {
+        heading: postContent.heading,
+        body: RichText.asHtml(postContent.body),
+      };
+    });
+
+    console.log(post.data.content);
+
+    const wordsInContent = post.data.content.reduce((acc, con) => {
+      const wordsInHeading = con.heading.split(' ').length;
+      const wordsInBody = RichText.asText(con.body).split(' ').length;
+
+      return acc + wordsInHeading + wordsInBody;
+    }, 0);
+
+    const expectedTimeReadingInMinutes = Math.ceil(wordsInContent / 200);
+
+    return {
+      firstPublicationDate: format(
+        new Date(post.first_publication_date),
+        'dd MMM yyyy',
+        {
+          locale: ptBR,
+        }
+      ),
+      data: {
+        ...post.data,
+        content,
+      },
+      expectedTimeReadingInMinutes,
+    };
+  }, [post]);
+
+  if (router.isFallback) {
+    return <div>Carregando...</div>;
+  }
+
   return (
     <>
       <Header />
-      <div>
-        {/* <Image src="/images/Banner.png" width={2048} height={400} /> */}
+      <div className={styles.banner}>
+        <Image src={postFormatted.data.banner.url} width={2048} height={400} />
       </div>
       <main className={styles.container}>
         <article className={styles.post}>
-          <h1>Criando um app CRA do zero</h1>
+          <h1>{postFormatted.data.title}</h1>
           <div className={styles.info}>
             <small>
               <FiCalendar size={20} />
-              15 Mar 2021
+              {postFormatted.firstPublicationDate}
             </small>
             <small>
               <FiUser size={20} />
-              Joseph Oliveira
+              {postFormatted.data.author}
             </small>
             <small>
-              <FiClock size={20} />4 min.
+              <FiClock size={20} />
+              {`${postFormatted.expectedTimeReadingInMinutes} min`}
             </small>
           </div>
-          <div className={styles.postContent}>
-            <h2>Proint et varius</h2>
-            <p>
-              Lorem Ipsum is simply dummy text of the printing and typesetting
-              industry. Lorem Ipsum has been the industry standard dummy text
-              ever since the 1500s, when an unknown printer took a galley of
-              type and scrambled it to make a type specimen book.
-            </p>
-            <h2>Cras laoreet mi</h2>
-            <p>
-              Lorem Ipsum is simply dummy text of the printing and typesetting
-              industry. Lorem Ipsum has been the industry standard dummy text
-              ever since the 1500s, when an unknown printer took a galley of
-              type and scrambled it to make a type specimen book.
-            </p>
-            <p>
-              Lorem Ipsum is simply dummy text of the printing and typesetting
-              industry. Lorem Ipsum has been the industry standard dummy text
-              ever since the 1500s, when an unknown printer took a galley of
-              type and scrambled it to make a type specimen book.
-            </p>
-            <p>
-              Lorem Ipsum is simply dummy text of the printing and typesetting
-              industry. Lorem Ipsum has been the industry standard dummy text
-              ever since the 1500s, when an unknown printer took a galley of
-              type and scrambled it to make a type specimen book.
-            </p>
-          </div>
+          {postFormatted.data.content.map(content => (
+            <div key={content.heading} className={styles.postContent}>
+              <h2>{content.heading}</h2>
+              <div
+                // eslint-disable-next-line react/no-danger
+                dangerouslySetInnerHTML={{
+                  __html: content.body,
+                }}
+              />
+            </div>
+          ))}
         </article>
       </main>
     </>
   );
 }
 
-// export const getStaticPaths = async () => {
-//   const prismic = getPrismicClient();
-//   const posts = await prismic.query(TODO);
+export const getStaticPaths: GetStaticPaths = async () => {
+  const prismic = getPrismicClient();
+  const posts = await prismic.query(
+    [Prismic.predicates.at('document.type', 'posts')],
+    {
+      fetch: ['posts.title', 'posts.banner', 'posts.author', 'posts.content'],
+      pageSize: 5,
+    }
+  );
 
-//   // TODO
-// };
+  const paths = posts.results.map(post => {
+    return {
+      params: {
+        slug: post.uid,
+      },
+    };
+  });
 
-// export const getStaticProps = async context => {
-//   const prismic = getPrismicClient();
-//   const response = await prismic.getByUID(TODO);
+  return {
+    paths,
+    fallback: true,
+  };
+};
 
-//   // TODO
-// };
+export const getStaticProps: GetStaticProps = async ({ params }) => {
+  const { slug } = params;
+
+  const prismic = getPrismicClient();
+
+  const response = await prismic.getByUID('posts', String(slug), {});
+
+  return {
+    props: { post: response },
+  };
+};

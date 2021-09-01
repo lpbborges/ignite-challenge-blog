@@ -4,6 +4,10 @@
   padding: 0 0.625rem;
 }
 
+.banner {
+  text-align: center;
+}
+
 .post {
   h1 {
     font-size: 3rem;
@@ -44,11 +48,29 @@
       margin: 4rem 0;
     }
 
-    p {
+    p,
+    ul,
+    ol {
       font-size: 1.125rem;
       font-weight: 400;
       line-height: 1.575;
       color: var(--body-color);
+      margin-bottom: 3rem;
+
+      strong {
+        font-size: 1.875rem;
+        font-weight: bold;
+        color: var(--heading-color);
+        line-height: 2.5rem;
+      }
+
+      a {
+        color: var(--highlight-color);
+
+        &:hover {
+          text-decoration: underline;
+        }
+      }
     }
   }
 }
