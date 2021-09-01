@@ -46,8 +46,6 @@ export default function Post({ post }: PostProps): JSX.Element {
       };
     });
 
-    console.log(post.data.content);
-
     const wordsInContent = post.data.content.reduce((acc, con) => {
       const wordsInHeading = con.heading.split(' ').length;
       const wordsInBody = RichText.asText(con.body).split(' ').length;
@@ -104,6 +102,7 @@ export default function Post({ post }: PostProps): JSX.Element {
             <div key={content.heading} className={styles.postContent}>
               <h2>{content.heading}</h2>
               <div
+                className={styles.contentBody}
                 // eslint-disable-next-line react/no-danger
                 dangerouslySetInnerHTML={{
                   __html: content.body,

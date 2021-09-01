@@ -48,27 +48,34 @@
       margin: 4rem 0;
     }
 
-    p,
-    ul,
-    ol {
-      font-size: 1.125rem;
-      font-weight: 400;
-      line-height: 1.575;
-      color: var(--body-color);
-      margin-bottom: 3rem;
-
-      strong {
-        font-size: 1.875rem;
-        font-weight: bold;
-        color: var(--heading-color);
-        line-height: 2.5rem;
+    .contentBody {
+      h1 {
+        font-size: 2.25rem;
       }
 
-      a {
-        color: var(--highlight-color);
+      h2 {
+        font-size: 1.5rem;
+      }
 
-        &:hover {
-          text-decoration: underline;
+      p,
+      ul,
+      ol {
+        font-size: 1.125rem;
+        font-weight: 400;
+        line-height: 1.575;
+        color: var(--body-color);
+        margin-bottom: 3rem;
+
+        strong {
+          color: var(--heading-color);
+        }
+
+        a {
+          color: var(--highlight-color);
+
+          &:hover {
+            text-decoration: underline;
+          }
         }
       }
     }
