@@ -76,7 +76,7 @@ export default function Home({ postsPagination }: HomeProps): JSX.Element {
             <button
               className={styles.buttonLoadMorePosts}
               type="button"
-              onClick={() => handleFetchMorePosts(next_page)}
+              onClick={() => handleFetchMorePosts(nextPage)}
             >
               Carregar mais posts
             </button>
