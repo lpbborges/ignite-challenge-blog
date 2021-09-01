@@ -1,1 +1,54 @@
-// TODO
+.container {
+  max-width: 720px;
+  margin: 5rem auto;
+  padding: 0 0.625rem;
+}
+
+.post {
+  h1 {
+    font-size: 3rem;
+    color: var(--heading-color);
+    font-weight: bold;
+    line-height: 3.630625rem;
+  }
+
+  .info {
+    display: flex;
+    margin-top: 1.5rem;
+
+    small {
+      display: flex;
+      align-items: center;
+
+      color: var(--info-color);
+      font-size: 0.875rem;
+      font-weight: 400;
+      line-height: 1.05875rem;
+
+      svg {
+        margin-right: 0.5rem;
+      }
+
+      & + small {
+        margin-left: 1.5rem;
+      }
+    }
+  }
+
+  .postContent {
+    h2 {
+      font-size: 2.25rem;
+      font-weight: bold;
+      color: var(--heading-color);
+      line-height: 3.15rem;
+      margin: 4rem 0;
+    }
+
+    p {
+      font-size: 1.125rem;
+      font-weight: 400;
+      line-height: 1.575;
+      color: var(--body-color);
+    }
+  }
+}
